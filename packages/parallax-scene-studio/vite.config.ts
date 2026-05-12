@@ -9,14 +9,6 @@ export default defineConfig({
       fileName: 'parallax-scene-studio',
       cssFileName: 'style',
       formats: ['es', 'umd']
-    },
-    rollupOptions: {
-      external: ['parallax-js'],
-      output: {
-        globals: {
-          'parallax-js': 'Parallax'
-        }
-      }
     }
   }
 });

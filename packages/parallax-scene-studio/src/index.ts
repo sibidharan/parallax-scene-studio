@@ -1,6 +1,7 @@
 import './style.css';
 
 export { ParallaxSceneStudio } from './editor';
+export { LabsThemeEditor } from './labs-editor';
 export {
   createPointerEngine,
   getSourceExport,
@@ -32,3 +33,4 @@ export type {
   UploadContext,
   UploadResult
 } from './types';
+export type { LabsThemeEditorOptions } from './labs-editor';

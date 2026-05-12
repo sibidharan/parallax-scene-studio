@@ -1,0 +1,94 @@
+#scene {
+    height: 100%;
+    width: 100%;
+    min-height: 100%;
+    min-height: 100%;
+    filter: saturate(130%) brightness(65%) contrast(100%);
+
+    &.te-no-filter {
+        filter: none;
+    }
+}
+
+html[data-coreui-theme="light"] #scene {
+    filter: saturate(90%) brightness(110%) contrast(85%);
+
+    &.te-no-filter {
+        filter: none;
+    }
+}
+
+html[data-coreui-theme="light"] .bg-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -998;
+    background: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+}
+
+.bg-cover {
+    position: fixed;
+    overflow: hidden;
+    z-index: -999;
+
+    // Maintain a fixed aspect ratio while covering the viewport (like object-fit:cover).
+    // Prevents element positions from shifting when the viewport proportion changes.
+    --dr: var(--design-ratio, 1.778);
+    width:  #{'max(110vw, calc(110vh * var(--dr)), 1200px)'};
+    height: #{'max(110vh, calc(110vw / var(--dr)))'};
+
+    max-width:  var(--parallax-max);
+    max-height: var(--parallax-max);
+
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    // Layer containers (direct children of #scene)
+    > div > div {
+        background-size: cover;
+        background-position: center center;
+        position: absolute;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        min-width: 100%;
+        min-height: 100%;
+        width: 100%;
+        height: 100%;
+        max-width : var(--parallax-max);
+        max-height: var(--parallax-max);
+    }
+
+    // Element children — don't force full-screen sizing
+    .te-element {
+        min-width: auto !important;
+        min-height: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+        background-size: contain;
+    }
+
+    // Responsive background-position for full-screen background containers
+    @media (min-width:961px) {
+        .te-element-layer {
+            background-position: 80% center !important;
+        }
+    }
+    @media (max-width:960px) {
+        .te-element-layer {
+            background-position: 70% center !important;
+        }
+    }
+    @media (min-width:1025px) {
+        .te-element-layer {
+            background-position: 90% center !important;
+        }
+    }
+    @media (min-width:1281px) {
+        .te-element-layer {
+            background-position: 100% center !important;
+        }
+    }
+}

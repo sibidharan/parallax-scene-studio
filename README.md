@@ -2,7 +2,10 @@
 
 A WYSIWYG scene editor and runtime for building layered parallax backgrounds.
 
-Parallax Scene Studio lets you visually compose image layers, tune depth, position sprites, add simple animations, and export a portable JSON scene config with the HTML, CSS, and JavaScript needed to render it.
+The package exposes two editor surfaces:
+
+- `LabsThemeEditor`: the Labs-style WYSIWYG editor with the original floating `.te-*` panels, layer tree, drag/resize/rotate handles, scene filters, panel reset, 3D peek, and Parallax.js behavior.
+- `ParallaxSceneStudio`: a smaller editor/runtime API for simple embeds and source-code export demos.
 
 ## Project Status
 
@@ -23,15 +26,29 @@ docs                             Integration and migration notes
 npm install parallax-scene-studio
 ```
 
-Optional compatibility dependency:
+## Basic Usage
 
-```bash
-npm install parallax-js
+Labs-parity editor:
+
+```js
+import { LabsThemeEditor } from 'parallax-scene-studio';
+import 'parallax-scene-studio/style.css';
+
+new LabsThemeEditor({
+  mount: '#editor',
+  value: sceneConfig,
+  showSourceCard: false,
+  onSave(scene) {
+    localStorage.setItem('scene', JSON.stringify(scene));
+  },
+  async onUpload(file) {
+    // Return your own permanent asset URL here.
+    return URL.createObjectURL(file);
+  }
+});
 ```
 
-The package includes a built-in pointer engine, so Parallax.js is not required for the default runtime.
-
-## Basic Usage
+Lightweight editor:
 
 ```js
 import { ParallaxSceneStudio } from 'parallax-scene-studio';

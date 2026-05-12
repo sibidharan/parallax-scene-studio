@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/static/css/demo.css">
   </head>
   <body>
-    <header class="demo-header">
+    <header class="demo-header" hidden>
       <div>
         <strong>Parallax Scene Studio</strong>
         <span>Lighthouse WYSIWYG demo</span>
@@ -37,12 +37,11 @@
       }
 
       function start(scene) {
-        if (studio) studio.destroy();
-        studio = new window.ParallaxSceneStudio.ParallaxSceneStudio({
+        studio = new window.ParallaxSceneStudio.LabsThemeEditor({
           mount: '#studio',
           value: scene,
-          showSourceCard: true,
-          sourceCardDefaultOpen: false,
+          mode: 'new',
+          showSourceCard: false,
           onChange(nextScene) {
             localStorage.setItem(storageKey, JSON.stringify(nextScene));
             statusEl.textContent = 'Saved in this browser.';
@@ -72,8 +71,7 @@
 
       resetBtn.addEventListener('click', () => {
         localStorage.removeItem(storageKey);
-        start(seedScene);
-        statusEl.textContent = 'Lighthouse scene reset.';
+        window.location.reload();
       });
 
       loadSeedScene()
