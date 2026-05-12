@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parallax Scene Studio · Lighthouse Demo</title>
+    <link rel="stylesheet" href="/vendor/style.css">
+    <link rel="stylesheet" href="/static/css/demo.css">
+  </head>
+  <body>
+    <header class="demo-header">
+      <div>
+        <strong>Parallax Scene Studio</strong>
+        <span>Lighthouse WYSIWYG demo</span>
+      </div>
+      <div class="demo-actions">
+        <button id="reset-scene" type="button">Reset Lighthouse</button>
+        <span id="status">Loading theme assets...</span>
+      </div>
+    </header>
+
+    <main id="studio"></main>
+
+    <script src="/vendor/parallax-scene-studio.js"></script>
+    <script>
+      const statusEl = document.getElementById('status');
+      const resetBtn = document.getElementById('reset-scene');
+      const storageKey = 'pss-flask-lighthouse-scene';
+      let studio = null;
+      let seedScene = null;
+
+      async function loadSeedScene() {
+        const response = await fetch('/api/scene/lighthouse');
+        if (!response.ok) throw new Error('Failed to load Lighthouse scene');
+        return response.json();
+      }
+
+      function start(scene) {
+        if (studio) studio.destroy();
+        studio = new window.ParallaxSceneStudio.ParallaxSceneStudio({
+          mount: '#studio',
+          value: scene,
+          showSourceCard: true,
+          sourceCardDefaultOpen: false,
+          onChange(nextScene) {
+            localStorage.setItem(storageKey, JSON.stringify(nextScene));
+            statusEl.textContent = 'Saved in this browser.';
+          },
+          onSave(nextScene) {
+            localStorage.setItem(storageKey, JSON.stringify(nextScene));
+            statusEl.textContent = 'Saved in this browser.';
+          },
+          async onUpload(file) {
+            const form = new FormData();
+            form.append('file', file);
+            const response = await fetch('/api/uploads/local', {
+              method: 'POST',
+              body: form
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.result !== 'success') {
+              throw new Error(payload.error || 'Upload failed');
+            }
+            return { url: payload.url };
+          },
+          notify(message, level) {
+            statusEl.textContent = `${level || 'info'}: ${message}`;
+          }
+        });
+      }
+
+      resetBtn.addEventListener('click', () => {
+        localStorage.removeItem(storageKey);
+        start(seedScene);
+        statusEl.textContent = 'Lighthouse scene reset.';
+      });
+
+      loadSeedScene()
+        .then((scene) => {
+          seedScene = scene;
+          const saved = localStorage.getItem(storageKey);
+          start(saved ? JSON.parse(saved) : scene);
+          statusEl.textContent = 'Lighthouse assets loaded.';
+        })
+        .catch((error) => {
+          statusEl.textContent = error.message;
+        });
+    </script>
+  </body>
+</html>
+

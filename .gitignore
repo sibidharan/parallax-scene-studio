@@ -1,4 +1,6 @@
 node_modules/
+.venv/
+.python-packages/
 dist/
 .vite/
 coverage/
@@ -9,3 +11,5 @@ __pycache__/
 .env
 .env.*
 !.env.example
+apps/flask-demo/static/uploads/*
+!apps/flask-demo/static/uploads/.gitkeep

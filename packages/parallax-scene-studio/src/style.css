@@ -257,22 +257,47 @@
   50% { opacity: 0.45; }
 }
 
+@keyframes pss-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(20px); }
+}
+
+@keyframes pss-swing {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+
 .pss-anim-pulse { animation-name: pss-pulse; animation-iteration-count: infinite; }
 .pss-anim-float,
-.pss-anim-drift,
 .pss-anim-rise,
-.pss-anim-sway,
 .pss-anim-wave { animation-name: pss-float; animation-iteration-count: infinite; }
+.pss-anim-drift { animation-name: pss-drift; animation-direction: alternate; animation-iteration-count: infinite; }
+.pss-anim-swing,
+.pss-anim-sway { animation-name: pss-swing; animation-iteration-count: infinite; transform-origin: 50% 0%; }
 .pss-anim-bob,
 .pss-anim-bounce,
 .pss-anim-rock,
-.pss-anim-swing,
 .pss-anim-shake { animation-name: pss-bob; animation-iteration-count: infinite; }
 .pss-anim-spin { animation-name: pss-spin; animation-timing-function: linear; animation-iteration-count: infinite; }
 .pss-anim-fade,
 .pss-anim-flicker,
 .pss-anim-glow,
 .pss-anim-zoom { animation-name: pss-fade; animation-iteration-count: infinite; }
+
+.te-wave {
+  overflow: visible !important;
+}
+
+.te-wave::after {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: var(--wave-after-h, 500px);
+  top: 100%;
+  left: 0;
+  background-color: #000;
+}
 
 @media (max-width: 900px) {
   .pss-toolbar {
@@ -289,4 +314,3 @@
     border-top: 1px solid var(--pss-border);
   }
 }
-

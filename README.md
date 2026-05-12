@@ -100,6 +100,23 @@ npm run dev
 npm run build
 ```
 
+## Demos
+
+Vite demo:
+
+```bash
+npm run dev
+```
+
+Flask Lighthouse demo:
+
+```bash
+npm run build
+cd apps/flask-demo
+python3 -m pip install --target .python-packages -r requirements.txt
+PYTHONPATH=.python-packages python3 app.py
+```
+
 ## Uploads
 
 The package does not ship storage credentials or a storage backend. Persistent uploads are handled through the `onUpload` callback.

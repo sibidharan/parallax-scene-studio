@@ -1,0 +1,342 @@
+{
+    "name": "Lighthouse",
+    "type": "parallax",
+    "mode": "element",
+    "scene": {
+        "background_color": "#000000",
+        "relative_input": true,
+        "scalar_x": 25,
+        "scalar_y": 15,
+        "friction_x": 0.1,
+        "friction_y": 0.1
+    },
+    "blur": {
+        "dark": "rgba(10, 15, 28, 0.95)",
+        "light": "rgba(230, 235, 245, 0.95)"
+    },
+    "layer_offset": {
+        "left": 0,
+        "top": 0
+    },
+    "layers": [
+        {
+            "name": "Background",
+            "depth": 0.1,
+            "elements": [
+                {
+                    "image": "background.jpg",
+                    "x": "-5%",
+                    "y": "auto",
+                    "width": "110%",
+                    "height": "110%",
+                    "animation": "",
+                    "animation_duration": "",
+                    "css": "bottom:20%;background-size:cover;background-position:50% 100%;border:none"
+                }
+            ]
+        },
+        {
+            "name": "Light Orange 1",
+            "depth": 0.1,
+            "elements": [
+                {
+                    "image": "light-orange.png",
+                    "x": "30%",
+                    "y": "auto",
+                    "width": "400px",
+                    "height": "400px",
+                    "animation": "pulse",
+                    "animation_duration": "20s",
+                    "css": "bottom:20%;margin:-200px;background-size:400px 400px;border:none"
+                }
+            ]
+        },
+        {
+            "name": "Light Purple",
+            "depth": 0.1,
+            "elements": [
+                {
+                    "image": "light-purple.png",
+                    "x": "45%",
+                    "y": "auto",
+                    "width": "400px",
+                    "height": "400px",
+                    "animation": "pulse",
+                    "animation_duration": "18s",
+                    "css": "bottom:26%;margin:-200px;background-size:400px 400px;border:none"
+                }
+            ]
+        },
+        {
+            "name": "Light Orange 2",
+            "depth": 0.1,
+            "elements": [
+                {
+                    "image": "light-orange.png",
+                    "x": "60%",
+                    "y": "auto",
+                    "width": "400px",
+                    "height": "400px",
+                    "animation": "pulse",
+                    "animation_duration": "16s",
+                    "css": "bottom:22%;margin:-200px;background-size:400px 400px;border:none"
+                }
+            ]
+        },
+        {
+            "name": "Rope Set 1",
+            "depth": 0.15,
+            "elements": [
+                {
+                    "image": "rope.png",
+                    "tag": "img",
+                    "x": "-10%",
+                    "y": "5%",
+                    "width": "120%",
+                    "height": "auto",
+                    "animation": "",
+                    "animation_duration": "",
+                    "css": "border:none;display:block",
+                    "children": [
+                        {
+                            "image": "board-cloud-2.png",
+                            "x": "20%",
+                            "y": "46%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "4s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        },
+                        {
+                            "image": "board-cloud-1.png",
+                            "x": "40%",
+                            "y": "66.5%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "5s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        },
+                        {
+                            "image": "board-birds.png",
+                            "x": "80%",
+                            "y": "46%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "float",
+                            "animation_duration": "6s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Rope Set 2",
+            "depth": 0.3,
+            "elements": [
+                {
+                    "image": "rope.png",
+                    "tag": "img",
+                    "x": "-10%",
+                    "y": "-2%",
+                    "width": "120%",
+                    "height": "auto",
+                    "animation": "",
+                    "animation_duration": "",
+                    "css": "border:none;display:block;transform:scale(1.056)",
+                    "children": [
+                        {
+                            "image": "board-cloud-1.png",
+                            "x": "10%",
+                            "y": "28%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "4.5s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        },
+                        {
+                            "image": "board-cloud-4.png",
+                            "x": "50%",
+                            "y": "69.5%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "3.5s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Wave Paint 1",
+            "depth": 0.3,
+            "elements": [
+                {
+                    "image": "wave-paint.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "86px",
+                    "animation": "drift",
+                    "animation_duration": "8s",
+                    "css": "bottom:22%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:200px",
+                    "class": "te-wave"
+                }
+            ]
+        },
+        {
+            "name": "Wave Plain 1",
+            "depth": 0.4,
+            "elements": [
+                {
+                    "image": "wave-plain.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "115px",
+                    "animation": "drift",
+                    "animation_duration": "7.5s",
+                    "css": "bottom:18%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:170px",
+                    "class": "te-wave"
+                }
+            ]
+        },
+        {
+            "name": "Wave Paint 2",
+            "depth": 0.5,
+            "elements": [
+                {
+                    "image": "wave-paint.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "144px",
+                    "animation": "drift",
+                    "animation_duration": "7s",
+                    "css": "bottom:13%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:145px",
+                    "class": "te-wave"
+                }
+            ]
+        },
+        {
+            "name": "Lighthouse",
+            "depth": 0.6,
+            "elements": [
+                {
+                    "image": "lighthouse.png",
+                    "x": "80%",
+                    "y": "auto",
+                    "width": "224px",
+                    "height": "392px",
+                    "animation": "",
+                    "animation_duration": "",
+                    "css": "bottom:16%;margin:0 -112px;background-size:224px 392px;border:none"
+                }
+            ]
+        },
+        {
+            "name": "Rope Set 3",
+            "depth": 0.6,
+            "elements": [
+                {
+                    "image": "rope.png",
+                    "tag": "img",
+                    "x": "-10%",
+                    "y": "-12%",
+                    "width": "120%",
+                    "height": "auto",
+                    "animation": "",
+                    "animation_duration": "",
+                    "css": "border:none;display:block;transform:scale(1.139)",
+                    "children": [
+                        {
+                            "image": "board-birds.png",
+                            "x": "30%",
+                            "y": "59%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "5s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        },
+                        {
+                            "image": "board-cloud-2.png",
+                            "x": "60%",
+                            "y": "66.5%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "4s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        },
+                        {
+                            "image": "board-cloud-3.png",
+                            "x": "80%",
+                            "y": "46%",
+                            "width": "280px",
+                            "height": "280px",
+                            "animation": "swing",
+                            "animation_duration": "6s",
+                            "css": "background-size:280px 280px;transform-origin:50% 0%;border:none;margin:0 -140px"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Wave Plain 2",
+            "depth": 0.6,
+            "elements": [
+                {
+                    "image": "wave-plain.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "173px",
+                    "animation": "drift",
+                    "animation_duration": "6s",
+                    "css": "bottom:9%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:115px",
+                    "class": "te-wave"
+                }
+            ]
+        },
+        {
+            "name": "Wave Plain 3",
+            "depth": 0.8,
+            "elements": [
+                {
+                    "image": "wave-plain.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "230px",
+                    "animation": "drift",
+                    "animation_duration": "5.5s",
+                    "css": "bottom:0%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:58px",
+                    "class": "te-wave"
+                }
+            ]
+        },
+        {
+            "name": "Wave Paint Front",
+            "depth": 1.0,
+            "elements": [
+                {
+                    "image": "wave-paint.png",
+                    "x": "-100%",
+                    "y": "auto",
+                    "width": "300%",
+                    "height": "288px",
+                    "animation": "drift",
+                    "animation_duration": "5s",
+                    "css": "bottom:-9%;background-size:auto 101%;background-repeat:repeat-x;border:none;--wave-after-h:0px",
+                    "class": "te-wave"
+                }
+            ]
+        }
+    ]
+}

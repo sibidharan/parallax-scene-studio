@@ -163,6 +163,10 @@ function createElementNode(element: ParallaxElement, indexPath: number[]): HTMLE
     el.style.backgroundImage = `url("${safeUrl(element.image)}")`;
   }
 
+  if (element.css) {
+    applyInlineCss(el, element.css);
+  }
+
   if (element.children?.length) {
     el.style.position = 'absolute';
     element.children.forEach((child, childIndex) => {
@@ -189,3 +193,17 @@ function safeUrl(value: string): string {
   return '';
 }
 
+function applyInlineCss(el: HTMLElement, cssText: string): void {
+  const blocked = /(?:^|[-\s])(?:behavior|expression|src)\s*:|url\s*\(|javascript\s*:|<\/|\/\*|\*\//i;
+  cssText.split(';').forEach((rawRule) => {
+    const rule = rawRule.trim();
+    if (!rule || blocked.test(rule)) return;
+    const idx = rule.indexOf(':');
+    if (idx <= 0) return;
+    const prop = rule.slice(0, idx).trim();
+    const value = rule.slice(idx + 1).trim();
+    if (!/^--[a-zA-Z0-9_-]+$|^[a-zA-Z-]+$/.test(prop)) return;
+    if (/[<>{}]/.test(value)) return;
+    el.style.setProperty(prop, value);
+  });
+}
