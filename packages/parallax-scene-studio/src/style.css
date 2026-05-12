@@ -207,6 +207,21 @@
   cursor: grabbing;
 }
 
+.pss-studio .pss-layer,
+.pss-studio .pss-element {
+  pointer-events: none;
+}
+
+.pss-studio .pss-element.is-selected {
+  pointer-events: auto;
+  outline: 1px dashed rgba(57, 217, 138, 0.85);
+  outline-offset: 3px;
+}
+
+.pss-studio .pss-scene.is-dragging .pss-element.is-selected {
+  cursor: grabbing;
+}
+
 .pss-source-card {
   border-color: rgba(255, 176, 32, 0.45);
 }

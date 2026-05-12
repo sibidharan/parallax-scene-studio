@@ -2,7 +2,7 @@ import { cloneScene, createDefaultScene, normalizeScene, validateScene } from '.
 import { getSourceExport, renderParallaxScene } from './runtime';
 import type { ParallaxElement, ParallaxScene, RenderedScene, StudioOptions, UploadResult } from './types';
 
-type Selection = { layerIndex: number; elementIndex?: number };
+type Selection = { layerIndex: number; elementPath: number[] };
 
 export class ParallaxSceneStudio {
   private readonly options: StudioOptions;
@@ -14,7 +14,7 @@ export class ParallaxSceneStudio {
   private layerPanel?: HTMLElement;
   private propsPanel?: HTMLElement;
   private typeButtons: HTMLButtonElement[] = [];
-  private selection: Selection = { layerIndex: 0 };
+  private selection: Selection = { layerIndex: 0, elementPath: [0] };
   private objectUrls: string[] = [];
   private sourceOpen: boolean;
 
@@ -38,7 +38,7 @@ export class ParallaxSceneStudio {
 
   setValue(value: Partial<ParallaxScene>): void {
     this.scene = normalizeScene(value);
-    this.selection = { layerIndex: 0 };
+    this.selection = { layerIndex: 0, elementPath: [0] };
     this.renderScene();
     this.renderPanel();
     this.emitChange();
@@ -110,7 +110,7 @@ export class ParallaxSceneStudio {
     staticType.dataset.type = 'static';
     staticType.textContent = 'Static';
     hint.className = 'pss-bottom-hint';
-    hint.textContent = 'Drag selected artwork directly on the scene';
+    hint.textContent = 'Select a layer, then drag it on the scene';
     this.typeButtons = [parallaxType, staticType];
 
     title.addEventListener('input', () => {
@@ -162,6 +162,7 @@ export class ParallaxSceneStudio {
     this.rendered?.destroy();
     this.rendered = renderParallaxScene(this.stage, this.scene);
     this.rendered.scene.addEventListener('pointerdown', (event) => this.startDrag(event));
+    this.syncSceneSelection();
   }
 
   private renderPanel(): void {
@@ -254,7 +255,8 @@ export class ParallaxSceneStudio {
       meta.append(name, depth);
       row.append(thumb, meta);
       row.addEventListener('click', () => {
-        this.selection = { layerIndex: index, elementIndex: 0 };
+        this.selection = { layerIndex: index, elementPath: [0] };
+        this.syncSceneSelection();
         this.renderPanel();
       });
       body.push(row);
@@ -373,7 +375,7 @@ export class ParallaxSceneStudio {
         animation_duration: '4s'
       }]
     });
-    this.selection = { layerIndex: this.scene.layers.length - 1, elementIndex: 0 };
+    this.selection = { layerIndex: this.scene.layers.length - 1, elementPath: [0] };
     this.renderScene();
     this.renderPanel();
     this.emitChange();
@@ -381,17 +383,25 @@ export class ParallaxSceneStudio {
 
   private startDrag(event: PointerEvent): void {
     if (this.options.readOnly) return;
-    const target = (event.target as HTMLElement).closest<HTMLElement>('.pss-element');
-    if (!target || !target.dataset.indexPath) return;
-    const [layerIndex, elementIndex] = target.dataset.indexPath.split('.').map(Number);
-    const layer = this.scene.layers[layerIndex];
-    const element = layer?.elements[elementIndex];
+    if (event.button !== 0) return;
+
+    const eventTarget = event.target instanceof Element ? event.target : null;
+    const hitTarget = eventTarget?.closest<HTMLElement>('.pss-element') || null;
+    const hitPath = hitTarget?.dataset.indexPath ? parseIndexPath(hitTarget.dataset.indexPath) : null;
+    if (hitPath) {
+      this.selection = hitPath;
+    }
+
+    const layer = this.scene.layers[this.selection.layerIndex];
+    const element = layer ? getElementByPath(layer.elements, this.selection.elementPath) : null;
+    const target = this.getSelectedElementNode();
     if (!layer || !element || layer.locked || element.locked) return;
+    if (!target) return;
 
-    this.selection = { layerIndex, elementIndex };
+    event.preventDefault();
+    this.syncSceneSelection();
     this.renderPanel();
-    target.setPointerCapture(event.pointerId);
-
+    this.rendered?.scene.classList.add('is-dragging');
     const parent = target.parentElement;
     if (!parent) return;
     const parentRect = parent.getBoundingClientRect();
@@ -399,8 +409,11 @@ export class ParallaxSceneStudio {
     const startY = event.clientY;
     const startLeft = parsePercent(element.x);
     const startTop = parsePercent(element.y);
+    const pointerId = event.pointerId;
 
     const move = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
+      moveEvent.preventDefault();
       const dx = ((moveEvent.clientX - startX) / Math.max(parentRect.width, 1)) * 100;
       const dy = ((moveEvent.clientY - startY) / Math.max(parentRect.height, 1)) * 100;
       element.x = `${round(startLeft + dx)}%`;
@@ -410,16 +423,19 @@ export class ParallaxSceneStudio {
       this.emitChange();
     };
 
-    const up = () => {
-      target.removeEventListener('pointermove', move);
-      target.removeEventListener('pointerup', up);
-      target.removeEventListener('pointercancel', up);
+    const up = (upEvent: PointerEvent) => {
+      if (upEvent.pointerId !== pointerId) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      this.rendered?.scene.classList.remove('is-dragging');
       this.renderPanel();
+      this.syncSceneSelection();
     };
 
-    target.addEventListener('pointermove', move);
-    target.addEventListener('pointerup', up);
-    target.addEventListener('pointercancel', up);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   }
 
   private updateSelectedElement(patch: Partial<ParallaxElement>): void {
@@ -434,8 +450,30 @@ export class ParallaxSceneStudio {
   private getSelectedElement(): ParallaxElement | null {
     const layer = this.scene.layers[this.selection.layerIndex];
     if (!layer) return null;
-    const elementIndex = this.selection.elementIndex ?? 0;
-    return layer.elements[elementIndex] || null;
+    return getElementByPath(layer.elements, this.selection.elementPath);
+  }
+
+  private getSelectedElementNode(): HTMLElement | null {
+    const scene = this.rendered?.scene;
+    if (!scene) return null;
+    const selectedPath = selectionToIndexPath(this.selection);
+    return Array.from(scene.querySelectorAll<HTMLElement>('.pss-element'))
+      .find((element) => element.dataset.indexPath === selectedPath) || null;
+  }
+
+  private syncSceneSelection(): void {
+    const scene = this.rendered?.scene;
+    if (!scene) return;
+    const selectedPath = selectionToIndexPath(this.selection);
+    scene.querySelectorAll<HTMLElement>('.pss-element.is-selected').forEach((element) => {
+      element.classList.remove('is-selected');
+      element.removeAttribute('aria-selected');
+    });
+    const selected = this.getSelectedElementNode();
+    if (!selected) return;
+    selected.classList.add('is-selected');
+    selected.setAttribute('aria-selected', 'true');
+    scene.dataset.selectedIndexPath = selectedPath;
   }
 
   private async save(): Promise<void> {
@@ -550,4 +588,24 @@ function firstLayerImage(element?: ParallaxElement): string {
 
 function controlName(label: string): string {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'control';
+}
+
+function selectionToIndexPath(selection: Selection): string {
+  return [selection.layerIndex, ...selection.elementPath].join('.');
+}
+
+function parseIndexPath(indexPath: string): Selection | null {
+  const parts = indexPath.split('.').map((part) => Number(part));
+  if (parts.length < 2 || parts.some((part) => !Number.isInteger(part) || part < 0)) return null;
+  const [layerIndex, ...elementPath] = parts;
+  return { layerIndex, elementPath };
+}
+
+function getElementByPath(elements: ParallaxElement[], elementPath: number[]): ParallaxElement | null {
+  let current: ParallaxElement | undefined = elements[elementPath[0]];
+  for (const index of elementPath.slice(1)) {
+    current = current?.children?.[index];
+    if (!current) return null;
+  }
+  return current || null;
 }
