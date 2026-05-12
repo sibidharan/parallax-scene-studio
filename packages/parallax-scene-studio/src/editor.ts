@@ -11,7 +11,9 @@ export class ParallaxSceneStudio {
   private rendered?: RenderedScene;
   private root?: HTMLElement;
   private stage?: HTMLElement;
-  private panel?: HTMLElement;
+  private layerPanel?: HTMLElement;
+  private propsPanel?: HTMLElement;
+  private typeButtons: HTMLButtonElement[] = [];
   private selection: Selection = { layerIndex: 0 };
   private objectUrls: string[] = [];
   private sourceOpen: boolean;
@@ -51,57 +53,79 @@ export class ParallaxSceneStudio {
 
   private renderShell(): void {
     const root = document.createElement('div');
-    const toolbar = document.createElement('div');
+    const stage = document.createElement('main');
+    const topbar = document.createElement('div');
+    const topLeft = document.createElement('div');
+    const topActions = document.createElement('div');
+    const brand = document.createElement('span');
     const title = document.createElement('input');
-    const typeToggle = document.createElement('button');
     const addLayer = document.createElement('button');
     const upload = document.createElement('button');
     const file = document.createElement('input');
     const save = document.createElement('button');
-    const workbench = document.createElement('div');
-    const stage = document.createElement('main');
-    const panel = document.createElement('aside');
+    const layerPanel = document.createElement('aside');
+    const propsPanel = document.createElement('aside');
+    const bottomBar = document.createElement('div');
+    const bottomLabel = document.createElement('span');
+    const typeSeg = document.createElement('span');
+    const parallaxType = document.createElement('button');
+    const staticType = document.createElement('button');
+    const hint = document.createElement('span');
 
     root.className = 'pss-studio';
-    toolbar.className = 'pss-toolbar';
+    stage.className = 'pss-stage';
+    topbar.className = 'pss-topbar';
+    topLeft.className = 'pss-topbar-left';
+    topActions.className = 'pss-actions';
+    brand.className = 'pss-brand';
+    brand.textContent = 'Parallax Scene Studio';
     title.className = 'pss-title-input';
     title.value = this.scene.name;
     title.maxLength = 80;
     title.ariaLabel = 'Scene title';
-    typeToggle.className = 'pss-button';
-    typeToggle.type = 'button';
+    title.name = 'scene_title';
     addLayer.className = 'pss-button';
     addLayer.type = 'button';
-    addLayer.textContent = 'Add Layer';
+    addLayer.textContent = '+ Layer';
     upload.className = 'pss-button pss-button-primary';
     upload.type = 'button';
-    upload.textContent = 'Upload Image';
+    upload.textContent = 'Upload';
     file.type = 'file';
     file.accept = 'image/png,image/jpeg,image/webp,image/svg+xml';
     file.hidden = true;
+    file.name = 'scene_image';
     save.className = 'pss-button';
     save.type = 'button';
     save.textContent = 'Save';
-    workbench.className = 'pss-workbench';
-    stage.className = 'pss-stage';
-    panel.className = 'pss-side-panel';
-
-    const updateTypeButton = () => {
-      typeToggle.textContent = this.scene.type === 'parallax' ? 'Parallax' : 'Static';
-    };
-    updateTypeButton();
+    layerPanel.className = 'pss-panel pss-layer-panel';
+    propsPanel.className = 'pss-panel pss-props-panel';
+    bottomBar.className = 'pss-bottom-bar';
+    bottomLabel.className = 'pss-bottom-label';
+    bottomLabel.textContent = 'type';
+    typeSeg.className = 'pss-seg';
+    parallaxType.type = 'button';
+    parallaxType.dataset.type = 'parallax';
+    parallaxType.textContent = 'Parallax';
+    staticType.type = 'button';
+    staticType.dataset.type = 'static';
+    staticType.textContent = 'Static';
+    hint.className = 'pss-bottom-hint';
+    hint.textContent = 'Drag selected artwork directly on the scene';
+    this.typeButtons = [parallaxType, staticType];
 
     title.addEventListener('input', () => {
       this.scene.name = title.value || 'Untitled Scene';
       this.renderPanel();
       this.emitChange();
     });
-    typeToggle.addEventListener('click', () => {
-      this.scene.type = this.scene.type === 'parallax' ? 'static' : 'parallax';
-      updateTypeButton();
-      this.renderScene();
-      this.renderPanel();
-      this.emitChange();
+    this.typeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        this.scene.type = button.dataset.type === 'static' ? 'static' : 'parallax';
+        this.updateTypeButtons();
+        this.renderScene();
+        this.renderPanel();
+        this.emitChange();
+      });
     });
     addLayer.addEventListener('click', () => this.addGeneratedLayer());
     upload.addEventListener('click', () => file.click());
@@ -112,14 +136,25 @@ export class ParallaxSceneStudio {
     });
     save.addEventListener('click', () => void this.save());
 
-    toolbar.append(title, typeToggle, addLayer, upload, file, save);
-    workbench.append(stage, panel);
-    root.append(toolbar, workbench);
+    topLeft.append(brand, title);
+    topActions.append(addLayer, upload, save);
+    topbar.append(topLeft, topActions);
+    typeSeg.append(parallaxType, staticType);
+    bottomBar.append(bottomLabel, typeSeg, hint);
+    root.append(stage, topbar, layerPanel, propsPanel, bottomBar, file);
     this.mount.replaceChildren(root);
 
     this.root = root;
     this.stage = stage;
-    this.panel = panel;
+    this.layerPanel = layerPanel;
+    this.propsPanel = propsPanel;
+    this.updateTypeButtons();
+  }
+
+  private updateTypeButtons(): void {
+    this.typeButtons.forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.type === this.scene.type);
+    });
   }
 
   private renderScene(): void {
@@ -130,8 +165,32 @@ export class ParallaxSceneStudio {
   }
 
   private renderPanel(): void {
-    if (!this.panel) return;
-    const panel = this.panel;
+    this.renderLayerPanel();
+    this.renderPropsPanel();
+  }
+
+  private renderLayerPanel(): void {
+    if (!this.layerPanel) return;
+    const panel = this.layerPanel;
+    const header = document.createElement('div');
+    const title = document.createElement('h2');
+    const count = document.createElement('span');
+    const tree = document.createElement('div');
+
+    panel.replaceChildren();
+    header.className = 'pss-panel-header';
+    title.textContent = 'Layers';
+    count.className = 'pss-panel-kicker';
+    count.textContent = `${this.scene.layers.length}`;
+    tree.className = 'pss-layer-tree';
+    tree.append(...this.renderLayerRows());
+    header.append(title, count);
+    panel.append(header, tree);
+  }
+
+  private renderPropsPanel(): void {
+    if (!this.propsPanel) return;
+    const panel = this.propsPanel;
     panel.replaceChildren();
 
     panel.append(
@@ -154,7 +213,17 @@ export class ParallaxSceneStudio {
       ])
     );
 
-    panel.append(this.renderLayerSection());
+    const selectedLayer = this.scene.layers[this.selection.layerIndex];
+    if (selectedLayer) {
+      panel.append(this.section('Layer', [
+        this.rangeControl('Depth', selectedLayer.depth, 0, 1, 0.01, (value) => {
+          selectedLayer.depth = value;
+          this.renderScene();
+          this.renderPanel();
+          this.emitChange();
+        })
+      ]));
+    }
 
     const selected = this.getSelectedElement();
     if (selected) panel.append(this.renderElementSection(selected));
@@ -164,14 +233,26 @@ export class ParallaxSceneStudio {
     }
   }
 
-  private renderLayerSection(): HTMLElement {
+  private renderLayerRows(): HTMLElement[] {
     const body: HTMLElement[] = [];
 
     this.scene.layers.forEach((layer, index) => {
       const row = document.createElement('button');
+      const thumb = document.createElement('span');
+      const meta = document.createElement('span');
+      const name = document.createElement('span');
+      const depth = document.createElement('span');
       row.type = 'button';
       row.className = `pss-layer-row ${this.selection.layerIndex === index ? 'is-active' : ''}`;
-      row.textContent = `${layer.name} · ${layer.depth.toFixed(2)}`;
+      thumb.className = 'pss-layer-thumb';
+      thumb.style.backgroundImage = `url("${firstLayerImage(layer.elements[0])}")`;
+      meta.className = 'pss-layer-meta';
+      name.className = 'pss-layer-name';
+      name.textContent = layer.name;
+      depth.className = 'pss-layer-depth';
+      depth.textContent = `depth ${layer.depth.toFixed(2)}`;
+      meta.append(name, depth);
+      row.append(thumb, meta);
       row.addEventListener('click', () => {
         this.selection = { layerIndex: index, elementIndex: 0 };
         this.renderPanel();
@@ -182,21 +263,11 @@ export class ParallaxSceneStudio {
     if (!body.length) {
       const empty = document.createElement('p');
       empty.className = 'pss-muted';
-      empty.textContent = 'No layers yet. Add or upload an image to start.';
+      empty.textContent = 'No layers yet.';
       body.push(empty);
     }
 
-    const selectedLayer = this.scene.layers[this.selection.layerIndex];
-    if (selectedLayer) {
-      body.push(this.rangeControl('Selected depth', selectedLayer.depth, 0, 1, 0.01, (value) => {
-        selectedLayer.depth = value;
-        this.renderScene();
-        this.renderPanel();
-        this.emitChange();
-      }));
-    }
-
-    return this.section('Layers', body);
+    return body;
   }
 
   private renderElementSection(element: ParallaxElement): HTMLElement {
@@ -214,7 +285,7 @@ export class ParallaxSceneStudio {
     const exportData = getSourceExport(this.scene);
     const wrapper = document.createElement('section');
     const header = document.createElement('button');
-    wrapper.className = 'pss-card pss-source-card';
+    wrapper.className = 'pss-section pss-source-card';
     header.className = 'pss-card-toggle';
     header.type = 'button';
     header.textContent = this.sourceOpen ? 'Source Code - hide' : 'Source Code - show';
@@ -380,7 +451,7 @@ export class ParallaxSceneStudio {
   private section(titleText: string, children: HTMLElement[]): HTMLElement {
     const section = document.createElement('section');
     const title = document.createElement('h2');
-    section.className = 'pss-card';
+    section.className = 'pss-section';
     title.textContent = titleText;
     section.append(title, ...children);
     return section;
@@ -393,6 +464,7 @@ export class ParallaxSceneStudio {
     label.className = 'pss-control';
     span.textContent = labelText;
     input.type = 'color';
+    input.name = controlName(labelText);
     input.value = value;
     input.addEventListener('input', () => onInput(input.value));
     label.append(span, input);
@@ -406,6 +478,7 @@ export class ParallaxSceneStudio {
     label.className = 'pss-control';
     span.textContent = labelText;
     input.type = 'text';
+    input.name = controlName(labelText);
     input.value = value;
     input.addEventListener('change', () => onInput(input.value));
     label.append(span, input);
@@ -427,6 +500,7 @@ export class ParallaxSceneStudio {
     label.className = 'pss-control';
     span.textContent = labelText;
     input.type = 'range';
+    input.name = controlName(labelText);
     input.min = String(min);
     input.max = String(max);
     input.step = String(step);
@@ -468,3 +542,12 @@ function round(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+function firstLayerImage(element?: ParallaxElement): string {
+  const image = element?.image || '';
+  if (!image) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"%3E%3Crect width="40" height="40" fill="%23262d38"/%3E%3C/svg%3E';
+  return image.replace(/"/g, '%22');
+}
+
+function controlName(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'control';
+}

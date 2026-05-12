@@ -28,6 +28,11 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/favicon.ico")
+def favicon():
+    return send_from_directory(LIGHTHOUSE_DIR, "lighthouse_thumb.jpg", mimetype="image/jpeg")
+
+
 @app.get("/vendor/<path:filename>")
 def vendor(filename: str):
     if filename == "parallax-scene-studio.js":
