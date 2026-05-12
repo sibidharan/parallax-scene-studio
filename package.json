@@ -1,0 +1,23 @@
+{
+  "name": "parallax-scene-studio-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/parallax-scene-studio",
+    "apps/demo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sibidharan/parallax-scene-studio.git"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev -w apps/demo",
+    "typecheck": "npm run typecheck --workspaces",
+    "preview": "npm run preview -w apps/demo"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2"
+  }
+}

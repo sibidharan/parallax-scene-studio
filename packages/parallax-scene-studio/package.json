@@ -1,0 +1,60 @@
+{
+  "name": "parallax-scene-studio",
+  "version": "0.1.0",
+  "description": "A WYSIWYG editor and runtime for layered parallax scenes.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Sibidharan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sibidharan/parallax-scene-studio.git",
+    "directory": "packages/parallax-scene-studio"
+  },
+  "bugs": {
+    "url": "https://github.com/sibidharan/parallax-scene-studio/issues"
+  },
+  "homepage": "https://github.com/sibidharan/parallax-scene-studio#readme",
+  "keywords": [
+    "parallax",
+    "wysiwyg",
+    "scene-editor",
+    "background",
+    "layers"
+  ],
+  "sideEffects": [
+    "./dist/style.css"
+  ],
+  "main": "./dist/parallax-scene-studio.umd.cjs",
+  "module": "./dist/parallax-scene-studio.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/parallax-scene-studio.js",
+      "require": "./dist/parallax-scene-studio.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json --emitDeclarationOnly",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "parallax-js": "^3.1.0"
+  },
+  "peerDependenciesMeta": {
+    "parallax-js": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "vite": "^7.2.2",
+    "typescript": "^5.9.3"
+  }
+}
