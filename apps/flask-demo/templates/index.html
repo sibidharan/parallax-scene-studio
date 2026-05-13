@@ -40,16 +40,95 @@
         studio = new window.ParallaxSceneStudio.LabsThemeEditor({
           mount: '#studio',
           value: scene,
+
+          // ── Editor mode ───────────────────────────────────────────────────
+          // 'new'          → creating a brand-new theme
+          // 'edit'         → editing an existing saved theme (theme_id in value)
+          // 'fork'         → editing a forked copy (forked_from in value)
+          // 'view'         → read-only preview, no save/edit controls
+          // 'admin_review' → shows Approve / Reject controls for moderation
+          //
+          // Labs: derived from query params (?mode=edit&theme_id=abc)
           mode: 'new',
+
           showSourceCard: false,
+
+          // ── onChange ─────────────────────────────────────────────────────
+          // Called ~500 ms after any edit. Use for draft persistence.
+          // Labs: writes to IndexedDB (offline resilience)
           onChange(nextScene) {
             localStorage.setItem(storageKey, JSON.stringify(nextScene));
-            statusEl.textContent = 'Saved in this browser.';
           },
-          onSave(nextScene) {
+
+          // ── onSave ───────────────────────────────────────────────────────
+          // Called on Save / Save & Apply / Save, Apply & Exit.
+          // Must return { theme_id } so the editor can wire up apply/submit.
+          //
+          // Labs:
+          //   POST /api/app/user_themes
+          //   body: { config: JSON, theme_id?, thumbnail_url? }
+          //   response: { result: "success", theme_id: string }
+          async onSave(nextScene, context) {
+            // context.apply  → true for "Save & Apply" / "Save, Apply & Exit"
+            // context.exit   → true for "Save, Apply & Exit"
+            // context.themeId → existing ID when editing a saved theme
+            // context.thumbnailDataUri → base64 JPEG from html2canvas (if captured)
             localStorage.setItem(storageKey, JSON.stringify(nextScene));
             statusEl.textContent = 'Saved in this browser.';
+
+            // In a real integration, POST to your API and return { theme_id }.
+            // The demo returns a stable "local-demo" ID so apply/submit work.
+            return { theme_id: 'local-demo' };
           },
+
+          // ── onApply ──────────────────────────────────────────────────────
+          // Called after a successful save when the action was "Save & Apply"
+          // or "Save, Apply & Exit". Activate this theme for the current user.
+          //
+          // Labs:
+          //   GET /api/app/set_theme?id=custom:{themeId}
+          async onApply(themeId) {
+            statusEl.textContent = `Theme "${themeId}" applied (demo — no-op).`;
+          },
+
+          // ── onExit ───────────────────────────────────────────────────────
+          // Called when user clicks "← Exit editor" or "Discard".
+          // Navigate away from the editor page.
+          //
+          // Labs: window.location.href = '/dashboard'
+          //
+          // Note: the built-in editor source also triggers window.location.href
+          // directly after "Save, Apply & Exit". Handle navigation at the host
+          // router level as well (e.g. intercept beforeunload or use a SPA router).
+          onExit() {
+            statusEl.textContent = 'Exit requested (demo — reloading page).';
+            // In the demo we just reload; in Labs this navigates to /dashboard.
+            window.location.reload();
+          },
+
+          // ── onSavePreferences ─────────────────────────────────────────────
+          // Called when the editor saves UI preferences (panel positions, etc.).
+          // preferenceId: e.g. "theme_editor_panels"
+          // value: JSON string
+          //
+          // Labs:
+          //   POST /api/app/preferences
+          //   body: { preference_id: string, value: string }
+          async onSavePreferences(preferenceId, value) {
+            // Demo: persist panel layout in localStorage
+            localStorage.setItem(`pss-pref-${preferenceId}`, value);
+          },
+
+          // ── onUpload ─────────────────────────────────────────────────────
+          // Called when a file is dropped or selected in the layer panel.
+          // Must return { url: string } pointing to the uploaded asset.
+          //
+          // If omitted, files are held in memory via URL.createObjectURL()
+          // for the session only (suitable for demos without a backend).
+          //
+          // Labs:
+          //   POST /api/app/user_theme_upload  (multipart: file + theme_id)
+          //   response: { result: "success", url: string }
           async onUpload(file) {
             const form = new FormData();
             form.append('file', file);
@@ -63,8 +142,49 @@
             }
             return { url: payload.url };
           },
+
+          // ── getAssetPickerHtml ────────────────────────────────────────────
+          // Called when user opens the image-pick dialog in the layer panel.
+          // Return an HTML string rendered inside the picker dialog.
+          //
+          // Labs:
+          //   GET /api/app/user_files?mode=picker&filter=theme
+          //   response: HTML (list of user-uploaded assets with click handlers)
+          async getAssetPickerHtml() {
+            return `<div style="padding:16px;color:#aeb7c5;text-align:center">
+              No asset picker configured for this demo.<br>
+              Use the Upload button to add images directly.
+            </div>`;
+          },
+
+          // ── getHelpHtml ───────────────────────────────────────────────────
+          // Called when user clicks the "?" help button.
+          // Return an HTML string rendered inside the xlarge help dialog.
+          //
+          // Labs:
+          //   GET /api/app/theme_help
+          //   response: HTML (editor documentation)
+          async getHelpHtml() {
+            return `<div class="te-help-dialog">
+              <div class="te-help-body">
+                <div class="te-help-section active">
+                  <div class="te-help-text">
+                    <p><strong>Parallax Scene Studio</strong> — WYSIWYG parallax editor.</p>
+                    <p>Select a layer or element, then drag, resize, rotate, and adjust
+                    properties from the side panels.</p>
+                    <p>Use the Layers panel to add, remove, reorder, and group elements.
+                    Use the Scene panel to control motion, filters, and background colour.</p>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          },
+
+          // ── notify ────────────────────────────────────────────────────────
+          // Called for all editor toasts and alerts.
+          // Labs: routed to the platform Toast component.
           notify(message, level) {
-            statusEl.textContent = `${level || 'info'}: ${message}`;
+            statusEl.textContent = `[${level || 'info'}] ${message}`;
           }
         });
       }
@@ -79,7 +199,8 @@
           seedScene = scene;
           const saved = localStorage.getItem(storageKey);
           start(saved ? JSON.parse(saved) : scene);
-          statusEl.textContent = 'Lighthouse assets loaded.';
+          document.querySelector('.demo-header').removeAttribute('hidden');
+          statusEl.textContent = 'Lighthouse scene loaded.';
         })
         .catch((error) => {
           statusEl.textContent = error.message;

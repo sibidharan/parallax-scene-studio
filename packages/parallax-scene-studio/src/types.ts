@@ -125,6 +125,32 @@ export interface UploadContext {
 
 export type UploadResult = string | { url: string; id?: string; [key: string]: unknown };
 
+/**
+ * Context passed to {@link LabsThemeEditorOptions.onSave}.
+ * Describes why the save was triggered.
+ */
+export interface SaveContext {
+  /** True when triggered by "Save & Apply" or "Save, Apply & Exit". */
+  apply: boolean;
+  /** True when triggered by "Save, Apply & Exit" (also sets `apply`). */
+  exit: boolean;
+  /** The existing theme ID when editing a saved theme; `undefined` for a brand-new theme. */
+  themeId?: string;
+  /** Base64 data-URI thumbnail captured via html2canvas immediately before the save call. `undefined` if no thumbnail was taken. */
+  thumbnailDataUri?: string;
+}
+
+/**
+ * Expected return value from {@link LabsThemeEditorOptions.onSave}.
+ * The `theme_id` is used for all subsequent `onApply`, `onSubmitForReview`,
+ * and admin-review calls.
+ */
+export interface SaveResult {
+  /** Platform-assigned ID for the saved theme. */
+  theme_id: string;
+}
+
+
 export interface StudioOptions {
   mount: string | HTMLElement;
   value?: Partial<ParallaxScene>;

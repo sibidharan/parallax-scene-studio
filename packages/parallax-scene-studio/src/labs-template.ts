@@ -1,8 +1,7 @@
 import type { ParallaxScene } from './types';
 
 export interface LabsEditorShellOptions {
-  mode?: 'new' | 'edit' | 'fork' | 'view' | 'admin_review';
-  showReviewControls?: boolean;
+  mode?: 'new' | 'edit' | 'fork' | 'view';
   showSourceCard?: boolean;
   panelPositions?: Record<string, { left?: string; top?: string; width?: string }>;
 }
@@ -10,7 +9,6 @@ export interface LabsEditorShellOptions {
 export function renderLabsEditorShell(scene: ParallaxScene, options: LabsEditorShellOptions = {}): string {
   const mode = options.mode || 'new';
   const isViewOnly = mode === 'view';
-  const isAdminReview = mode === 'admin_review';
   const reviewStatus = String((scene as ParallaxScene & { review_status?: string }).review_status || 'draft');
   const title = escapeHtml(scene.name || '');
   const accent = escapeHtml(scene.accent || '#FF6B1A');
@@ -31,7 +29,7 @@ export function renderLabsEditorShell(scene: ParallaxScene, options: LabsEditorS
     </span>
     <span class="te-status te-btn-glass">
       ${isViewOnly
-        ? `View Only &middot; <strong>${title || 'Untitled'}</strong>${isAdminReview ? ' &middot; <span class="badge badge-soft-warning" style="font-size:11px">Admin Review</span>' : ''}`
+        ? `View Only &middot; <strong>${title || 'Untitled'}</strong>`
         : `Theme Editor &middot; <strong><input type="text" id="te-title-input" class="te-title-editable" value="${title}" placeholder="Untitled" maxlength="30"></strong> &middot; <span id="te-save-status">${reviewStatus === 'pending_review' ? 'pending review' : 'unsaved'}</span>`}
     </span>
     <span class="te-actions">
@@ -41,7 +39,6 @@ export function renderLabsEditorShell(scene: ParallaxScene, options: LabsEditorS
       <button class="te-btn te-btn-glass" id="te-parallax-toggle" title="Pause/resume parallax movement" data-coreui-toggle="tooltip">⏸ Parallax live</button>
       <button class="te-btn te-btn-glass" id="te-zen-btn" title="Hide all chrome (Tab)" data-coreui-toggle="tooltip">&#x26F6; Preview only</button>
       ${isViewOnly ? '' : '<button class="te-btn te-btn-glass" id="te-discard-btn">Discard</button>'}
-      ${isViewOnly ? '' : '<button class="te-btn te-btn-glass" id="te-submit-review-btn" style="background:rgba(var(--cui-primary-rgb),0.3);border-color:rgba(var(--cui-primary-rgb),0.5)">Submit for Review</button>'}
       ${isViewOnly ? '' : `<span class="te-save-split">
         <button class="te-btn te-btn-glass te-save-action te-save-main" id="te-save-btn">Save</button>
         <button class="te-btn te-btn-glass te-save-action te-save-drop" id="te-save-dropdown">&#x25BE;</button>
@@ -51,7 +48,6 @@ export function renderLabsEditorShell(scene: ParallaxScene, options: LabsEditorS
           <button class="te-save-option" id="te-retake-thumb-btn">&#x1F4F7; Retake Thumbnail</button>
         </span>
       </span>`}
-      ${options.showReviewControls ? '<button class="te-btn te-btn-success" id="te-admin-approve" style="background:rgba(40,167,69,0.8);border:1px solid rgba(40,167,69,0.9);color:#fff">Approve</button><button class="te-btn te-btn-warm" id="te-admin-reject">Reject</button>' : ''}
     </span>
   </div>
 
