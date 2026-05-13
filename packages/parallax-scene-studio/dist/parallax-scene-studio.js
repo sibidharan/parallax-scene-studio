@@ -14318,7 +14318,8 @@ class rw {
   restoreEndpoints;
   restoreGlobals;
   constructor(A) {
-    this.options = A, this.mount = Aw(A.mount), this.scene = gt(A.value), this.renderShell(), this.restoreGlobals = _B(A), this.restoreEndpoints = $B(A, this.objectUrls, (t) => {
+    this.options = A, this.mount = Aw(A.mount), this.scene = gt(A.value), this.renderShell(), this.restoreGlobals = _B(A), this.restoreEndpoints = A.passthrough ? () => {
+    } : $B(A, this.objectUrls, (t) => {
       this.scene = gt(t);
     }), WB();
   }

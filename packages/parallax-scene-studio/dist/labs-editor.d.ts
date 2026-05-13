@@ -12,6 +12,16 @@ export interface LabsThemeEditorOptions extends LabsEditorShellOptions {
      */
     preservePageUrl?: boolean;
     /**
+     * When `true`, skip jQuery AJAX interception entirely. All `$.post`,
+     * `$.get`, and `$.ajax` calls from the editor source reach the real
+     * server — no callbacks are invoked.
+     *
+     * Use this when the host page has a real backend with the editor API
+     * endpoints (e.g. running inside Labs). The editor source already
+     * makes the correct AJAX calls; they just need to go through.
+     */
+    passthrough?: boolean;
+    /**
      * Called whenever the scene changes (debounced by the editor, ~500 ms).
      * Use this for auto-save drafts or live previews.
      *
