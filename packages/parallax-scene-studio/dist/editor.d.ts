@@ -1,0 +1,47 @@
+import type { ParallaxScene, StudioOptions } from './types';
+export declare class ParallaxSceneStudio {
+    private readonly options;
+    private readonly mount;
+    private scene;
+    private rendered?;
+    private root?;
+    private stage?;
+    private layerPanel?;
+    private propsPanel?;
+    private typeButtons;
+    private selection;
+    private objectUrls;
+    private sourceOpen;
+    constructor(options: StudioOptions);
+    getValue(): ParallaxScene;
+    setValue(value: Partial<ParallaxScene>): void;
+    destroy(): void;
+    private renderShell;
+    private updateTypeButtons;
+    private renderScene;
+    private renderPanel;
+    private renderLayerPanel;
+    private renderPropsPanel;
+    private renderLayerRows;
+    private renderElementSection;
+    private renderSourceCard;
+    private codeBlock;
+    private addUploadedLayer;
+    private uploadFile;
+    private addGeneratedLayer;
+    private addLayerWithImage;
+    private startDrag;
+    private updateSelectedElement;
+    private getSelectedElement;
+    private getSelectedElementNode;
+    private syncSceneSelection;
+    private save;
+    private section;
+    private colorControl;
+    private textControl;
+    private rangeControl;
+    private emitChange;
+    private notify;
+    private resolveMount;
+}
+//# sourceMappingURL=editor.d.ts.map
